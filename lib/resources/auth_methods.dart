@@ -33,6 +33,7 @@ class AuthMethods {
         try {
           await _firestore.collection("users").doc(cred.user!.uid).set({
             'username': username,
+            "status": "Unavailable",
             'uid': cred.user!.uid,
             'photoUrl': photoUrl,
             'email': email,

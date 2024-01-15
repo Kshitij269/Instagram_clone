@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/models/user.dart' as model;
@@ -248,14 +250,14 @@ class _PostCardState extends State<PostCard> {
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         // Show a loading indicator while waiting for the result
-                        return CircularProgressIndicator();
+                        return const CircularProgressIndicator();
                       } else if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
                       } else {
                         bool isFavorite = snapshot.data ?? false;
 
                         return IconButton(
-                          icon: isFavorite ? Icon(Icons.bookmark) : Icon(Icons.bookmark_border),
+                          icon: isFavorite ? const Icon(Icons.bookmark) : const Icon(Icons.bookmark_border),
                           onPressed: () async {
                             bool isCurrentlyFavorite =
                                 await FireStoreMethods().isPostInFavorites(
@@ -328,7 +330,7 @@ class _PostCardState extends State<PostCard> {
                         ),
                         TextSpan(
                             text: ' ${widget.snap['description']}',
-                            style: TextStyle(fontSize: 15)),
+                            style: const TextStyle(fontSize: 15)),
                       ],
                     ),
                   ),

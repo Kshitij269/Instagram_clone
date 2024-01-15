@@ -293,10 +293,9 @@ class _SearchCardState extends State<SearchCard> {
                             bool isFavorite = snapshot.data ?? false;
 
                             return IconButton(
-                              icon: Icon(
-                                Icons.bookmark,
-                                color: isFavorite ? Colors.red : null,
-                              ),
+                              icon: isFavorite
+                                  ? const Icon(Icons.bookmark)
+                                  : const Icon(Icons.bookmark_border),
                               onPressed: () async {
                                 bool isCurrentlyFavorite =
                                     await FireStoreMethods().isPostInFavorites(
@@ -378,7 +377,7 @@ class _SearchCardState extends State<SearchCard> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return CircularProgressIndicator();
+                          return const CircularProgressIndicator();
                         } else if (snapshot.hasError) {
                           return Text('Error: ${snapshot.error}');
                         } else if (!snapshot.hasData ||
@@ -386,7 +385,7 @@ class _SearchCardState extends State<SearchCard> {
                           commentLen = 0;
 
                           return Text(
-                            'View all ${commentLen} comments',
+                            'View all $commentLen comments',
                             style: const TextStyle(
                               fontSize: 16,
                               color: secondaryColor,
@@ -399,7 +398,7 @@ class _SearchCardState extends State<SearchCard> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 4),
                               child: Text(
-                                'View all ${commentLen} comments',
+                                'View all $commentLen comments',
                                 style: const TextStyle(
                                   fontSize: 16,
                                   color: secondaryColor,
