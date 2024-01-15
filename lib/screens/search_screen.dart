@@ -2,9 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:instagram_clone/screens/profile_screen.dart';
-import 'package:instagram_clone/screens/yourpost.dart';
 import 'package:instagram_clone/utils/colors.dart';
-import 'package:instagram_clone/widgets/post_card.dart';
 import 'package:instagram_clone/widgets/search_screen_postcard.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -13,8 +11,6 @@ class SearchScreen extends StatefulWidget {
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
-
-// ... (previous imports)
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController searchController = TextEditingController();
@@ -58,7 +54,6 @@ class _SearchScreenState extends State<SearchScreen> {
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
                     return Material(
-                      // Wrap InkWell with Material
                       child: InkWell(
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
@@ -102,7 +97,6 @@ class _SearchScreenState extends State<SearchScreen> {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Material(
-                    // Wrap MasonryGridView.count with Material
                     child: MasonryGridView.count(
                       mainAxisSpacing: 5,
                       crossAxisSpacing: 5,
@@ -110,7 +104,6 @@ class _SearchScreenState extends State<SearchScreen> {
                       itemCount: (snapshot.data! as dynamic).docs.length,
                       itemBuilder: (context, index) {
                         return Material(
-                          // Wrap GestureDetector with Material
                           child: GestureDetector(
                             onTap: () => Navigator.push(
                               context,

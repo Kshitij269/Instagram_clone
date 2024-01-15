@@ -100,10 +100,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           context,
                           MaterialPageRoute(
                               builder: ((context) => FavouriteScreen(
-                                uid: FirebaseAuth.instance.currentUser!.uid!,
+                                uid: FirebaseAuth.instance.currentUser!.uid,
                               ))));
                     },
-                    icon: Icon(Icons.bookmark))
+                    icon: const Icon(Icons.bookmark))
               ],
             ),
             body: ListView(

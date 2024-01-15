@@ -2,8 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:instagram_clone/utils/global_variable.dart';
-import 'package:instagram_clone/widgets/post_card.dart';
 import 'package:instagram_clone/widgets/search_screen_postcard.dart';
 
 class FavouriteScreen extends StatefulWidget {
@@ -17,8 +15,6 @@ class FavouriteScreen extends StatefulWidget {
 class _FavouriteScreenState extends State<FavouriteScreen> {
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-
     return Scaffold(
         appBar: AppBar(
           title: Text("Favourites"),

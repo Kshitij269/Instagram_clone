@@ -77,7 +77,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         ],
                       ),
                       Image.network(
-                        notification!['postUrl'],
+                        notification['postUrl'],
                         height: 80,
                       ),
                     ]),

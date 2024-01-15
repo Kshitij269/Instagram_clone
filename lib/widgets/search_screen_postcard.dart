@@ -2,7 +2,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/models/user.dart' as model;
 import 'package:instagram_clone/providers/user_provider.dart';
@@ -221,6 +220,7 @@ class _SearchCardState extends State<SearchCard> {
                     AnimatedOpacity(
                       duration: const Duration(milliseconds: 200),
                       opacity:
+                          // ignore: dead_code
                           false ? 1 : 0, // Adjust animation condition if needed
                       child: LikeAnimation(
                         isAnimating:
