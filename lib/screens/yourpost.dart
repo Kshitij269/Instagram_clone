@@ -1,7 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:instagram_clone/models/user.dart' as model;
-
 import 'package:instagram_clone/providers/user_provider.dart';
 import 'package:instagram_clone/resources/firestore_methods.dart';
 import 'package:instagram_clone/screens/comments_screen.dart';
@@ -14,7 +14,6 @@ import 'package:provider/provider.dart';
 
 class YourPostScreen extends StatefulWidget {
   final snap;
-
   const YourPostScreen({Key? key, required this.snap}) : super(key: key);
 
   @override
@@ -49,9 +48,9 @@ class _YourPostScreenState extends State<YourPostScreen> {
 
   deletePost(String postId) async {
     try {
-      // Ensure the widget is still mounted before performing any operations
       if (mounted) {
         await FireStoreMethods().deletePost(postId);
+        Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (err) {
       // Handle the error
@@ -68,7 +67,63 @@ class _YourPostScreenState extends State<YourPostScreen> {
     final model.User user = Provider.of<UserProvider>(context).getUser;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Post Details'),
+        centerTitle: true,
+        title: const Text('Post Details'),
+        actions: [
+          widget.snap['uid'].toString() == user.uid
+              ? IconButton(
+                  icon: const Icon(Icons.more_vert),
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return Dialog(
+                            child: ListView(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shrinkWrap: true,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => UpdatePostScreen(
+                                          currentDescription: widget
+                                              .snap['description']
+                                              .toString(),
+                                          postImageUrl:
+                                              widget.snap['postUrl'].toString(),
+                                          postId:
+                                              widget.snap['postId'].toString(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    child: const Text("Update"),
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    deletePost(
+                                      widget.snap['postId'].toString(),
+                                    );
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    child: const Text("Delete"),
+                                  ),
+                                )
+                              ],
+                            ),
+                          );
+                        }));
+                  },
+                )
+              : Container(),
+        ],
       ),
       body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
@@ -77,13 +132,13 @@ class _YourPostScreenState extends State<YourPostScreen> {
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
           if (!snapshot.hasData || snapshot.data == null) {
-            return Center(
+            return const Center(
               child: Text('Post not found'),
             );
           }
@@ -102,7 +157,7 @@ class _YourPostScreenState extends State<YourPostScreen> {
                       height: 300,
                       fit: BoxFit.cover,
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
                     Container(
@@ -139,7 +194,7 @@ class _YourPostScreenState extends State<YourPostScreen> {
                                   ),
                                   TextSpan(
                                     text: ' ${widget.snap['description']}',
-                                    style: TextStyle(fontSize: 15),
+                                    style: const TextStyle(fontSize: 15),
                                   ),
                                 ],
                               ),
@@ -164,10 +219,9 @@ class _YourPostScreenState extends State<YourPostScreen> {
                                     child: CircularProgressIndicator(),
                                   );
                                 }
-                                if (snapshot.data!.docs.length == 0) {
-                                  return Center(
-                                      child: Container(
-                                          child: Text("No Comments")));
+                                if (snapshot.data!.docs.isEmpty) {
+                                  return const Center(
+                                      child: Text("No Comments"));
                                 } else {
                                   return ListView.builder(
                                     itemCount: snapshot.data!.docs.length > 2
@@ -213,58 +267,15 @@ class _YourPostScreenState extends State<YourPostScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        widget.snap['uid'].toString() == user.uid
-                            ? ElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => UpdatePostScreen(
-                                        currentDescription: widget
-                                            .snap['description']
-                                            .toString(),
-                                        postImageUrl:
-                                            post['postUrl'].toString(),
-                                        postId:
-                                            widget.snap['postId'].toString(),
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.all(10),
-                                  child: Text("Update"),
-                                ),
-                              )
-                            : Container(),
-                        widget.snap['uid'].toString() == user.uid
-                            ? ElevatedButton(
-                                onPressed: () {
-                                  deletePost(
-                                    widget.snap['postId'].toString(),
-                                  );
-                                  Navigator.of(context).pop();
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.all(10),
-                                  child: Text("Delete"),
-                                ),
-                              )
-                            : Container(),
-                      ],
-                    )
                   ],
                 ),
               ),
             );
           } else {
-            return Center(
+            return const Center(
               child: Text('Post data is incomplete or missing'),
             );
           }

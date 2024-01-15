@@ -60,7 +60,7 @@ class _UpdatePostScreenState extends State<UpdatePostScreen> {
                         .collection('posts')
                         .doc(widget.postId)
                         .update({'description': _descriptionController.text});
-                    Navigator.of(context).pop();
+                    Navigator.of(context).popUntil((route) => route.isFirst);
                     setState(() {
                       showSnackBar(context, "Post Updated Successfully");
                     });

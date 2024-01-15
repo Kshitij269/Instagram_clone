@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:instagram_clone/models/post.dart';
 import 'package:instagram_clone/resources/storage_methods.dart';
+import 'package:instagram_clone/utils/utils.dart';
 import 'package:uuid/uuid.dart';
 
 class FireStoreMethods {
@@ -9,7 +11,6 @@ class FireStoreMethods {
 
   Future<String> uploadPost(String description, Uint8List file, String uid,
       String username, String profImage) async {
-    // asking uid here because we dont want to make extra calls to firebase auth when we can just get from our state management
     String res = "Some error occurred";
     try {
       String photoUrl =
@@ -33,19 +34,77 @@ class FireStoreMethods {
     return res;
   }
 
+  Future<bool> isPostInFavorites(
+    String userId,
+    String postId,
+    BuildContext context,
+  ) async {
+    try {
+      DocumentSnapshot favoriteDoc = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('favorites')
+          .doc(postId)
+          .get();
+
+      return favoriteDoc.exists;
+    } catch (error) {
+      showSnackBar(context, "Error checking favorites: $error");
+      return false;
+    }
+  }
+
+  Future<void> removeFromFavorites(
+    String userId,
+    String postId,
+    BuildContext context,
+  ) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('favorites')
+          .doc(postId)
+          .delete();
+      showSnackBar(context, "Item is Removed From Favourite");
+    } catch (error) {
+      showSnackBar(context, "Error removing from favorites: $error");
+    }
+  }
+
   Future<String> likePost(String postId, String uid, List likes) async {
     String res = "Some error occurred";
     try {
+      DocumentSnapshot postSnapshot =
+          await _firestore.collection('posts').doc(postId).get();
+
+      DocumentSnapshot userSnapshot =
+          await _firestore.collection('users').doc(uid).get();
+
+      String postOwnerUid = postSnapshot['uid'];
+
       if (likes.contains(uid)) {
-        // if the likes list contains the user uid, we need to remove it
         _firestore.collection('posts').doc(postId).update({
           'likes': FieldValue.arrayRemove([uid])
         });
       } else {
-        // else we need to add uid to the likes array
         _firestore.collection('posts').doc(postId).update({
           'likes': FieldValue.arrayUnion([uid])
         });
+        if (uid != postOwnerUid) {
+          _firestore
+              .collection('users')
+              .doc(postOwnerUid)
+              .collection('notifications')
+              .add({
+            'type': 'like',
+            'postUrl': postSnapshot['postUrl'],
+            'username': userSnapshot['username'],
+            'postName': postSnapshot['description'],
+            'timestamp': FieldValue.serverTimestamp(),
+            'read': false,
+          });
+        }
       }
       res = 'success';
     } catch (err) {
@@ -54,14 +113,21 @@ class FireStoreMethods {
     return res;
   }
 
-  // Post comment
   Future<String> postComment(String postId, String text, String uid,
       String name, String profilePic) async {
     String res = "Some error occurred";
     try {
       if (text.isNotEmpty) {
-        // if the likes list contains the user uid, we need to remove it
         String commentId = const Uuid().v1();
+
+        DocumentSnapshot postSnapshot =
+            await _firestore.collection('posts').doc(postId).get();
+
+        DocumentSnapshot userSnapshot =
+            await _firestore.collection('users').doc(uid).get();
+
+        String postOwnerUid = postSnapshot['uid'];
+
         _firestore
             .collection('posts')
             .doc(postId)
@@ -75,6 +141,22 @@ class FireStoreMethods {
           'commentId': commentId,
           'datePublished': DateTime.now(),
         });
+
+        if (uid != postOwnerUid) {
+          _firestore
+              .collection('users')
+              .doc(postOwnerUid)
+              .collection('notifications')
+              .add({
+            'type': 'commente',
+            'postUrl': postSnapshot['postUrl'],
+            'username': userSnapshot['username'],
+            'postName': postSnapshot['description'],
+            'timestamp': FieldValue.serverTimestamp(),
+            'read': false,
+          });
+        }
+
         res = 'success';
       } else {
         res = "Please enter text";
@@ -85,11 +167,26 @@ class FireStoreMethods {
     return res;
   }
 
-  // Delete Post
+  Future<void> addToFavourite(
+      String uid, String postId, BuildContext context) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('favorites')
+          .doc(postId)
+          .set({'postId': postId});
+
+      showSnackBar(context, "Item Added To Favourite");
+    } catch (err) {
+      showSnackBar(context, "Some Error Occured");
+    }
+  }
+
   Future<void> deletePost(String postId) async {
     try {
       await FirebaseFirestore.instance.collection('posts').doc(postId).delete();
-        await FirebaseFirestore.instance
+      await FirebaseFirestore.instance
           .collection('posts')
           .doc(postId)
           .collection('comments')

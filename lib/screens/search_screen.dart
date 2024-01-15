@@ -2,7 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:instagram_clone/screens/profile_screen.dart';
+import 'package:instagram_clone/screens/yourpost.dart';
 import 'package:instagram_clone/utils/colors.dart';
+import 'package:instagram_clone/widgets/post_card.dart';
+import 'package:instagram_clone/widgets/search_screen_postcard.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -10,6 +13,8 @@ class SearchScreen extends StatefulWidget {
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
+
+// ... (previous imports)
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController searchController = TextEditingController();
@@ -52,27 +57,29 @@ class _SearchScreenState extends State<SearchScreen> {
                 return ListView.builder(
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => ProfileScreen(
-                            uid: snapshot.data!.docs[index]['uid'],
+                    return Material(
+                      // Wrap InkWell with Material
+                      child: InkWell(
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => ProfileScreen(
+                              uid: snapshot.data!.docs[index]['uid'],
+                            ),
                           ),
                         ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage: NetworkImage(
-                              snapshot.data!.docs[index]['photoUrl'],
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: NetworkImage(
+                                snapshot.data!.docs[index]['photoUrl'],
+                              ),
+                              radius: 20,
                             ),
-                            radius: 20,
-                          ),
-                          title: Text(
-                            
-                            snapshot.data!.docs[index]['username'],
-                            style: TextStyle(fontSize: 20),
+                            title: Text(
+                              snapshot.data!.docs[index]['username'],
+                              style: TextStyle(fontSize: 20),
+                            ),
                           ),
                         ),
                       ),
@@ -92,15 +99,44 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: CircularProgressIndicator(),
                   );
                 }
-                return MasonryGridView.count(
-                  crossAxisCount: 3,
-                  itemCount: (snapshot.data! as dynamic).docs.length,
-                  itemBuilder: (context, index) => Image.network(
-                    (snapshot.data! as dynamic).docs[index]['postUrl'],
-                    fit: BoxFit.cover,
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Material(
+                    // Wrap MasonryGridView.count with Material
+                    child: MasonryGridView.count(
+                      mainAxisSpacing: 5,
+                      crossAxisSpacing: 5,
+                      crossAxisCount: 3,
+                      itemCount: (snapshot.data! as dynamic).docs.length,
+                      itemBuilder: (context, index) {
+                        return Material(
+                          // Wrap GestureDetector with Material
+                          child: GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) {
+                                return Scaffold(
+                                  appBar: AppBar(
+                                    centerTitle: true,
+                                    title: const Text('Post Details'),
+                                  ),
+                                  body: SearchCard(
+                                    snap:
+                                        (snapshot.data! as dynamic).docs[index],
+                                  ),
+                                );
+                              }),
+                            ),
+                            child: Image.network(
+                              (snapshot.data! as dynamic).docs[index]
+                                  ['postUrl'],
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                  mainAxisSpacing: 8.0,
-                  crossAxisSpacing: 8.0,
                 );
               },
             ),

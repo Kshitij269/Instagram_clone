@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/resources/firestore_methods.dart';
 import 'package:instagram_clone/screens/edit_profile_screen.dart';
+import 'package:instagram_clone/screens/favourite_screen.dart';
 import 'package:instagram_clone/screens/login_screen.dart';
 import 'package:instagram_clone/screens/yourpost.dart';
 import 'package:instagram_clone/utils/colors.dart';
@@ -92,6 +93,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 userData['username'],
               ),
               centerTitle: false,
+              actions: [
+                IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: ((context) => FavouriteScreen(
+                                uid: FirebaseAuth.instance.currentUser!.uid!,
+                              ))));
+                    },
+                    icon: Icon(Icons.bookmark))
+              ],
             ),
             body: ListView(
               children: [

@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/models/user.dart' as model;
 import 'package:instagram_clone/providers/user_provider.dart';
 import 'package:instagram_clone/resources/firestore_methods.dart';
 import 'package:instagram_clone/screens/comments_screen.dart';
-import 'package:instagram_clone/screens/yourpost.dart';
 import 'package:instagram_clone/utils/colors.dart';
 import 'package:instagram_clone/utils/global_variable.dart';
 import 'package:instagram_clone/utils/utils.dart';
@@ -28,6 +29,7 @@ class _PostCardState extends State<PostCard> {
   int commentLen = 0;
   bool isLikeAnimating = false;
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  List<String> postId = [];
 
   @override
   void initState() {
@@ -238,17 +240,62 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
               ),
-              IconButton(
-                  icon: const Icon(
-                    Icons.send,
-                  ),
-                  onPressed: () {}),
               Expanded(
-                  child: Align(
-                alignment: Alignment.bottomRight,
-                child: IconButton(
-                    icon: const Icon(Icons.bookmark_border), onPressed: () {}),
-              ))
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: FutureBuilder<bool>(
+                    future: FireStoreMethods().isPostInFavorites(
+                      user.uid,
+                      widget.snap['postId'].toString(),
+                      context,
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        // Show a loading indicator while waiting for the result
+                        return CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        bool isFavorite = snapshot.data ?? false;
+
+                        return IconButton(
+                          icon: isFavorite ? Icon(Icons.bookmark) : Icon(Icons.bookmark_border),
+                          onPressed: () async {
+                            bool isCurrentlyFavorite =
+                                await FireStoreMethods().isPostInFavorites(
+                              user.uid,
+                              widget.snap['postId'].toString(),
+                              context,
+                            );
+
+                            if (isCurrentlyFavorite) {
+                              // Post is already in favorites, remove it
+                              await FireStoreMethods().removeFromFavorites(
+                                user.uid,
+                                widget.snap['postId'].toString(),
+                                context,
+                              );
+                            } else {
+                              // Post is not in favorites, add it
+                              await FireStoreMethods().addToFavourite(
+                                user.uid,
+                                widget.snap['postId'].toString(),
+                                context,
+                              );
+                            }
+
+                            // Update the UI
+                            setState(() {
+                              // Re-fetch the favorite status and update the color
+                              isFavorite = !isCurrentlyFavorite;
+                            });
+                          },
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ),
             ],
           ),
           //DESCRIPTION AND NUMBER OF COMMENTS

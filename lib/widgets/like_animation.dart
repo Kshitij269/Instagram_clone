@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:instagram_clone/utils/utils.dart';
 
 class LikeAnimation extends StatefulWidget {
   final Widget child;
